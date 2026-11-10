@@ -48,6 +48,23 @@ hr{border:0;border-top:1px solid var(--line);margin:14px 0}.empty{text-align:cen
 .quick strong{display:block;font-size:14px}.quick small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
 .home-create{width:100%;margin:8px 0 15px;background:#18b981;color:#04160f}
 .currencyline{display:flex;justify-content:space-between;gap:8px;font-size:12px;margin-top:9px;color:#c8d5d1}
+
+.hero{background:linear-gradient(135deg,#073e33 0%,#102923 55%,#101a1c 100%);border:1px solid #168b6b;border-radius:19px;padding:18px;margin:18px 0 14px;box-shadow:inset 0 1px 0 #ffffff12}
+.hero-label{font-size:11px;letter-spacing:1.1px;font-weight:800;color:#b7d8cf}
+.hero-value{font-size:29px;font-weight:850;letter-spacing:-.6px;margin:9px 0 0;color:#f4fffb}
+.hero-usd{font-size:23px;margin-top:6px}
+.hero-sub{font-size:11px;color:#a6c8bd;margin-top:1px}
+.hero-divider{height:1px;background:#ffffff22;margin:11px 0 4px}
+.hero-note{font-size:10px;color:#a6c8bd;margin-top:12px;line-height:1.45}
+.quickgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.quick{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;min-height:94px;background:linear-gradient(145deg,#171c20,#111519);border:1px solid #303940;border-radius:15px;padding:13px 14px;text-align:left;color:var(--text)}
+.quick .qicon{font-size:23px;line-height:1;color:#20c997;margin-bottom:8px}
+.quick strong{font-size:14px}.quick small{font-size:10px;color:#a6adb7;margin-top:3px}
+.home-create{width:100%;margin:4px 0 12px;background:#19b981;color:#04150f;border-radius:13px;padding:15px}
+.empty-state{padding:20px;text-align:center}
+.empty-mark{font-size:28px;color:#20c997;margin-bottom:8px}
+.empty-state p{color:var(--muted);font-size:12px;line-height:1.5}
+
 @media(max-width:390px){.brandlock img{width:46px;height:46px}.brand{font-size:17px}.welcome{font-size:20px}.hero-value{font-size:24px}}
 
 @media(min-width:600px){.app{padding-top:28px}.modal{align-items:center}.sheet{border-radius:22px;max-height:85vh}}
@@ -90,21 +107,31 @@ function fmtDate(d){return new Date(d+'T12:00:00').toLocaleDateString('es-NI',{d
 function go(t){tab=t;document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));render()}
 function render(){let v=document.getElementById('view');if(tab==='home')v.innerHTML=home();if(tab==='movements')v.innerHTML=movementPage();if(tab==='reports')v.innerHTML=reportsPage();if(tab==='history')v.innerHTML=historyPage()}
 function home(){
- if(!db.capitals.length)return `<div class="welcome">Bienvenido</div><div class="muted">Gestiona, controla y haz crecer tu capital.</div><div class="card" style="margin-top:18px"><div class="empty"><img src="logo-principal.jpg" alt="" style="width:92px;height:92px;border-radius:20px;object-fit:cover;margin-bottom:12px"><h2>Comienza creando tu primer capital</h2><p>Registra capitales en córdobas o dólares. Cada uno tendrá su propio saldo e historial.</p><button class="primary" onclick="newCapital()">＋ Crear mi primer capital</button></div></div><div class="notice">Tus datos se guardan localmente en este dispositivo. No se sincronizan automáticamente con otros equipos.</div>`;
- let nio=db.capitals.filter(c=>c.active!==false&&c.currency==='NIO').reduce((s,c)=>s+totals(c.id).balance,0);
- let usd=db.capitals.filter(c=>c.active!==false&&c.currency==='USD').reduce((s,c)=>s+totals(c.id).balance,0);
- let count=db.capitals.filter(c=>c.active!==false).length;
- return `<div class="welcome">Bienvenido</div><div class="muted">Gestiona, controla y haz crecer tu capital.</div>
- <div class="hero"><div class="hero-label">Capital disponible · ${count} capital${count===1?'':'es'}</div>${nio?`<div class="hero-value">${money(nio,'NIO')}</div>`:''}${usd?`<div class="hero-value">${money(usd,'USD')}</div>`:''}${!nio&&!usd?`<div class="hero-value">Sin saldo disponible</div>`:''}<div class="hero-note">Monedas separadas · No se convierten ni se mezclan</div></div>
+ let active=db.capitals.filter(c=>c.active!==false);
+ let nio=active.filter(c=>c.currency==='NIO').reduce((s,c)=>s+totals(c.id).balance,0);
+ let usd=active.filter(c=>c.currency==='USD').reduce((s,c)=>s+totals(c.id).balance,0);
+ let count=active.length;
+ return `<div class="welcome">Bienvenido</div>
+ <div class="muted">Gestiona, controla y haz crecer tu capital.</div>
+ <div class="hero">
+   <div class="row"><div class="hero-label">CAPITAL DISPONIBLE</div><span class="tag">${count} ${count===1?'capital':'capitales'}</span></div>
+   <div class="hero-value">${money(nio,'NIO')}</div>
+   <div class="hero-sub">Córdobas</div>
+   <div class="hero-divider"></div>
+   <div class="hero-value hero-usd">${money(usd,'USD')}</div>
+   <div class="hero-sub">Dólares</div>
+   <div class="hero-note">Cada moneda se muestra por separado; no se convierten ni se mezclan.</div>
+ </div>
  <div class="quickgrid">
- <button class="quick" onclick="go('home')"><div class="qicon">◉</div><strong>Capitales</strong><small>Crea y administra</small></button>
- <button class="quick" onclick="go('movements')"><div class="qicon">⇄</div><strong>Movimientos</strong><small>Registra gastos y entradas</small></button>
- <button class="quick" onclick="go('reports')"><div class="qicon">▥</div><strong>Reportes</strong><small>Analiza tus resultados</small></button>
- <button class="quick" onclick="go('history')"><div class="qicon">◷</div><strong>Historial</strong><small>Consulta tu actividad</small></button>
- </div><button class="home-create" onclick="newCapital()">＋ Crear nuevo capital</button>
- <div class="row"><h2 style="margin-top:4px">Mis capitales</h2><span class="tag">${count} activos</span></div>
- ${db.capitals.map(c=>{let t=totals(c.id);return `<button class="capital" onclick="openCapital('${c.id}')"><div class="row"><strong>${esc(c.name)}</strong><span class="pill">${c.currency==='USD'?'DÓLARES':'CÓRDOBAS'}</span></div><div class="big">${money(t.balance,c.currency)}</div><div class="row small muted"><span>Gastado: ${money(t.spent,c.currency)}</span><span>Pendiente: ${money(t.pending,c.currency)}</span></div></button>`}).join('')}
- <div class="notice">Cada capital conserva su moneda y sus movimientos independientes. No se realizan transferencias entre capitales.</div>`;
+   <button class="quick" onclick="document.getElementById('capitalList').scrollIntoView({behavior:'smooth'})"><div class="qicon">◉</div><strong>Capitales</strong><small>Crea y administra</small></button>
+   <button class="quick" onclick="go('movements')"><div class="qicon">⇄</div><strong>Movimientos</strong><small>Registra ingresos y gastos</small></button>
+   <button class="quick" onclick="go('reports')"><div class="qicon">▥</div><strong>Reportes</strong><small>Analiza tus resultados</small></button>
+   <button class="quick" onclick="go('history')"><div class="qicon">◷</div><strong>Historial</strong><small>Consulta tu actividad</small></button>
+ </div>
+ <button class="home-create" onclick="newCapital()">＋ Crear nuevo capital</button>
+ <div class="row" id="capitalList"><h2 style="margin-top:8px">Mis capitales</h2><span class="tag">${count} activos</span></div>
+ ${active.length?active.map(c=>{let t=totals(c.id);return `<button class="capital" onclick="openCapital('${c.id}')"><div class="row"><strong>${esc(c.name)}</strong><span class="pill">${c.currency==='USD'?'DÓLARES':'CÓRDOBAS'}</span></div><div class="big">${money(t.balance,c.currency)}</div><div class="row small muted"><span>Gastado: ${money(t.spent,c.currency)}</span><span>Pendiente: ${money(t.pending,c.currency)}</span></div></button>`}).join(''):'<div class="card empty-state"><div class="empty-mark">＋</div><strong>Aún no tienes capitales registrados</strong><p>Crea tu primer capital para comenzar a controlar gastos, aportes y recuperaciones.</p><button class="secondary" onclick="newCapital()">Crear primer capital</button></div>'}
+ <div class="notice">Tus datos se guardan localmente en este dispositivo. Conserva copias de seguridad desde Configuración.</div>`;
 }
 function openCapital(cid){selected=cid;tab='detail';renderDetail()}
 function renderDetail(){let c=cap(selected);if(!c){go('home');return}let t=totals(c.id),es=validEvents(c.id).sort((a,b)=>(b.date||'').localeCompare(a.date||''));document.getElementById('view').innerHTML=`
