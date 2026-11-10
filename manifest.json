@@ -1,0 +1,10 @@
+{
+  "name": "CONTROL DE CAPITAL",
+  "short_name": "Capital",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0d0e11",
+  "theme_color": "#101114",
+  "description": "Control local de capitales, gastos y recuperaciones.",
+  "icons": []
+}
