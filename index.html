@@ -110,7 +110,7 @@ function totals(cid){
 }
 function fmtDate(d){return new Date(d+'T12:00:00').toLocaleDateString('es-NI',{day:'2-digit',month:'short',year:'numeric'})}
 function go(t){tab=t;document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));render()}
-function render(){let v=document.getElementById('view');if(tab==='home')v.innerHTML=home();if(tab==='movements')v.innerHTML=movementPage();if(tab==='reports')v.innerHTML=reportsPage();if(tab==='history')v.innerHTML=historyPage()}
+function render(){let v=document.getElementById('view');if(tab==='home')v.innerHTML=home();if(tab==='capitals')v.innerHTML=capitalsPage();if(tab==='movements')v.innerHTML=movementPage();if(tab==='reports')v.innerHTML=reportsPage();if(tab==='history')v.innerHTML=historyPage()}
 function home(){
  let active=db.capitals.filter(c=>c.active!==false);
  let nio=active.filter(c=>c.currency==='NIO').reduce((s,c)=>s+totals(c.id).balance,0);
@@ -128,15 +128,22 @@ function home(){
    <div class="hero-note">Cada moneda se muestra por separado; no se convierten ni se mezclan.</div>
  </div>
  <div class="quickgrid">
-   <button class="quick" onclick="document.getElementById('capitalList').scrollIntoView({behavior:'smooth'})"><div class="qicon">◉</div><strong>Capitales</strong><small>Crea y administra</small></button>
+   <button class="quick" onclick="go('capitals')"><div class="qicon">◉</div><strong>Capitales</strong><small>Crea y administra</small></button>
    <button class="quick" onclick="go('movements')"><div class="qicon">⇄</div><strong>Movimientos</strong><small>Registra ingresos y gastos</small></button>
    <button class="quick" onclick="go('reports')"><div class="qicon">▥</div><strong>Reportes</strong><small>Analiza tus resultados</small></button>
    <button class="quick" onclick="go('history')"><div class="qicon">◷</div><strong>Historial</strong><small>Consulta tu actividad</small></button>
  </div>
  <button class="home-create" onclick="newCapital()">＋ Crear nuevo capital</button>
- <div class="row" id="capitalList"><h2 style="margin-top:8px">Mis capitales</h2><span class="tag">${count} activos</span></div>
- ${active.length?active.map(c=>{let t=totals(c.id);return `<button class="capital" onclick="openCapital('${c.id}')"><div class="row"><strong>${esc(c.name)}</strong><span class="pill">${c.currency==='USD'?'DÓLARES':'CÓRDOBAS'}</span></div><div class="big">${money(t.balance,c.currency)}</div><div class="row small muted"><span>Gastado: ${money(t.spent,c.currency)}</span><span>Pendiente: ${money(t.pending,c.currency)}</span></div></button>`}).join(''):'<div class="card empty-state"><div class="empty-mark">＋</div><strong>Aún no tienes capitales registrados</strong><p>Crea tu primer capital para comenzar a controlar gastos, aportes y recuperaciones.</p><button class="secondary" onclick="newCapital()">Crear primer capital</button></div>'}
  <div class="notice">Tus datos se guardan localmente en este dispositivo. Conserva copias de seguridad desde Configuración.</div>`;
+}
+function capitalsPage(){
+ let active=db.capitals.filter(c=>c.active!==false);
+ return `<div class="row"><button class="secondary" onclick="go('home')">← Inicio</button><span class="tag">${active.length} activos</span></div>
+ <h2>Mis capitales</h2>
+ <p class="muted">Cada capital conserva su moneda, saldo e historial independiente.</p>
+ <button class="home-create" onclick="newCapital()">＋ Crear nuevo capital</button>
+ ${active.length?active.map(c=>{let t=totals(c.id);return `<button class="capital" onclick="openCapital('${c.id}')"><div class="row"><strong>${esc(c.name)}</strong><span class="pill">${c.currency==='USD'?'DÓLARES':'CÓRDOBAS'}</span></div><div class="big">${money(t.balance,c.currency)}</div><div class="row small muted"><span>Gastado: ${money(t.spent,c.currency)}</span><span>Pendiente: ${money(t.pending,c.currency)}</span></div></button>`}).join(''):`<div class="card empty-state"><div class="empty-mark">＋</div><strong>Aún no tienes capitales registrados</strong><p>Crea tu primer capital para comenzar a controlar gastos, aportes y recuperaciones.</p></div>`}
+ <div class="notice">Los capitales en córdobas y dólares se administran por separado.</div>`;
 }
 function openCapital(cid){selected=cid;tab='detail';renderDetail()}
 function renderDetail(){let c=cap(selected);if(!c){go('home');return}let t=totals(c.id),es=validEvents(c.id).sort((a,b)=>(b.date||'').localeCompare(a.date||''));document.getElementById('view').innerHTML=`
